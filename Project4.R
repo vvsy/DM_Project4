@@ -46,3 +46,14 @@ apply(df1, 2, function(col)sum(is.na(col))/length(col)) #I don't know why there 
 
 # EDA
 
+df[complete.cases(df[ , 60:61]),] -> df1
+df[rowSums(is.na(df[ , 60:61])) != 0, ] -> df3
+
+
+library(VIM)
+aggr_plot <- aggr(df, col=c('navyblue','red'), numbers=TRUE, sortVars=TRUE,
+                  labels=names(data), cex.axis= .5, gap=1, 
+)
+#其中area4cat,city5cat,city7,citycat7,area4cat缺失的點一樣，insant,paym不一樣
+
+

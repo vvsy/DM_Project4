@@ -18,82 +18,58 @@ lapply(df, function(x) length(unique(x)))
 ## drop the col which is only one outcome -> fnf (all of them Femoral Neck Fracture), seq57 (all of them are 0)
 df %>% select(-fnf,-seq57) -> df
 
-## check the ratio of missing value
-apply(df, 2, function(col)sum(is.na(col))/length(col)) -> ratio 
-as.data.frame(ratio) -> ratio
-ratio
+## drop age cols *****************,-age,-aid21
+
+df %>% select(-age,-aid21) -> df
+
 
 ## convert variables to correct property
-factor_col = c("id","dmfail","renal","aid19","aid21","male","bipolar","ch4cat","ch2cat","ch3cat","cin4cat","cin2cat","cin3cat","cindex","cno","seq25","seq26","seq27","seq28","seq29","seq30","seq31","seq32","seq33","seq34","seq35","seq36","seq37","seq38","seq39","seq40","seq41","seq42","seq43","seq44","seq45","seq46","seq47","seq48","seq49","seq50","seq51","seq52","seq53","seq54","seq55","seq56","seq58","seq59","hospvol4cat","areacode","area4cat","city7","city5cat","city7cat","nihno")
+factor_col = c("id","dmfail","renal","aid21","male","bipolar","ch4cat","ch2cat","ch3cat","cin4cat","cin2cat","cin3cat","cindex","cno","seq25","seq26","seq27","seq28","seq29","seq30","seq31","seq32","seq33","seq34","seq35","seq36","seq37","seq38","seq39","seq40","seq41","seq42","seq43","seq44","seq45","seq46","seq47","seq48","seq49","seq50","seq51","seq52","seq53","seq54","seq55","seq56","seq58","seq59","hospvol4cat","areacode","area4cat","city7","city5cat","city7cat","nihno")
 
 df[factor_col] <- lapply(df[factor_col], factor)
 
-numeric_col = c("med_cost","age","hospvolume","insamt","paym")
+numeric_col = c("med_cost","hospvolume","insamt","paym")
 df[numeric_col ]<- lapply(df[numeric_col], as.numeric)
 
-## fill NA by mice with 1 iteration (I will redo the outcome with 50 iteration by my PC's GPU later)
-#library(mice)
-#mice.data <- mice(df,
-#                  m = 1,           
-#                  maxit = 1,      # max iteration
-#                  method = "cart", 
-#                  seed = 188)
-
-#df <- complete(mice.data,1)
-
-#apply(df1, 2, function(col)sum(is.na(col))/length(col)) #I don't know why there still has NA in city7cat?
 
 
-# EDA
-
+## check the ratio of missing value
+df[ df == "XX" ] <- NA
+apply(df, 2, function(col)sum(is.na(col))/length(col)) -> ratio 
+as.data.frame(ratio) -> ratio
+ratio
 library(VIM)
 aggr_plot <- aggr(df, col=c('navyblue','red'), numbers=TRUE, sortVars=TRUE,
                   labels=names(data), cex.axis= .5, gap=1)
 #發現55:59行的na值有為非缺失所以丟掉56:59僅留下55行來補值
-
-df[complete.cases(df[ , 55:59]),] -> df1 #完整的資料
-df[!complete.cases(df[ , 55:59]),] -> df2 #不完整資料
-
-apply(df1, 2, function(col)sum(is.na(col))/length(col)) -> ratio1
-as.data.frame(ratio1) -> ratio1
-ratio1
+ggplot(df,aes(x =df$city5cat)) + geom_bar()
+ggplot(df,aes(x =df$city7cat)) + geom_bar()#觀察5分布比較平均所以刪掉7
+df %>% select(-city7cat,-areacode) -> df
 
 
-df2 %>% select(-area4cat,-city7,-city5cat,-city7cat,-nihno) -> df2
-apply(df2, 2, function(col)sum(is.na(col))/length(col)) -> ratio2
-as.data.frame(ratio2) -> ratio2
-ratio2
 
 library(mice)
 
 ####
-mice.data <- mice(df1,
+mice.data <- mice(df,
                   m = 1,           
-                  maxit = 1,      # max iteration
+                  maxit = 5,      # max iteration
                   method = "cart", 
                   seed = 188)
 
-micedf1 <- complete(mice.data,1)
-apply(micedf1, 2, function(col)sum(is.na(col))/length(col)) -> miceratio1
-as.data.frame(miceratio1) -> miceratio1
-miceratio1
+micedf <- complete(mice.data,1)
+apply(micedf, 2, function(col)sum(is.na(col))/length(col)) -> miceratio
+as.data.frame(miceratio) -> miceratio
+miceratio
 
-####
-mice.data2 <- mice(df2,
-                  m = 1,           
-                  maxit = 1,      # max iteration
-                  method = "cart", 
-                  seed = 188)
-
-micedf2 <- complete(mice.data2,1)
-apply(micedf2, 2, function(col)sum(is.na(col))/length(col)) -> miceratio2
-as.data.frame(miceratio2) -> miceratio2
-miceratio2
-####
+save(micedf,file="~/Dropbox/mice.data.Rda")
 
 
-save(micedf1,file="~/Dropbox/mice.data1.Rda")
-save(micedf2,file="~/Dropbox/mice.data2.Rda")
+##outcome
+library(ggplot2)
+ggplot(df,aes(y = df$med_cost)) + geom_boxplot() #離群值6250筆不處理
+df %>% filter(df$med_cost > quantile(df$med_cost,0.75)) %>% summarise(x=n())
+ggplot(df,aes(x = df$dmfail)) + geom_bar() #多6744筆佔總體0.26沒差不處理 
 
 
 

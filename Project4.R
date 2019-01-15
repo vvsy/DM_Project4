@@ -32,28 +32,49 @@ numeric_col = c("med_cost","age","hospvolume","insamt","paym")
 df[numeric_col ]<- lapply(df[numeric_col], as.numeric)
 
 ## fill NA by mice with 1 iteration (I will redo the outcome with 50 iteration by my PC's GPU later)
-library(mice)
-mice.data <- mice(df,
-                  m = 1,           
-                  maxit = 1,      # max iteration
-                  method = "cart", 
-                  seed = 188)
+#library(mice)
+#mice.data <- mice(df,
+#                  m = 1,           
+#                  maxit = 1,      # max iteration
+#                  method = "cart", 
+#                  seed = 188)
 
-df <- complete(mice.data,1)
+#df <- complete(mice.data,1)
 
-apply(df1, 2, function(col)sum(is.na(col))/length(col)) #I don't know why there still has NA in city7cat?
+#apply(df1, 2, function(col)sum(is.na(col))/length(col)) #I don't know why there still has NA in city7cat?
 
 
 # EDA
 
-df[complete.cases(df[ , 60:61]),] -> df1
-df[rowSums(is.na(df[ , 60:61])) != 0, ] -> df3
-
-
 library(VIM)
 aggr_plot <- aggr(df, col=c('navyblue','red'), numbers=TRUE, sortVars=TRUE,
-                  labels=names(data), cex.axis= .5, gap=1, 
-)
-#其中area4cat,city5cat,city7,citycat7,area4cat缺失的點一樣，insant,paym不一樣
+                  labels=names(data), cex.axis= .5, gap=1)
+#發現55:59行的na值有為非缺失所以丟掉56:59僅留下55行來補值
+
+df[complete.cases(df[ , 55:59]),] -> df1 #完整的資料
+df[!complete.cases(df[ , 55:59]),] -> df2 #不完整資料
+
+apply(df1, 2, function(col)sum(is.na(col))/length(col)) -> ratio1
+as.data.frame(ratio1) -> ratio1
+ratio1
+apply(df2, 2, function(col)sum(is.na(col))/length(col)) -> ratio2
+as.data.frame(ratio2) -> ratio2
+ratio2
+
+df2 %>% select(-area4cat,-city7,-city5cat,-city7cat,-nihno) -> df2
+
+library(mice)
+mice.data <- mice(df1,m = 1,maxit = 1,method = "cart",seed = 188)
+mice.data$data
+apply(mice.data$data, 2, function(col)sum(is.na(col))/length(col)) -> ratiomice
+as.data.frame(ratiomice) -> ratiomice
+ratiomice
+
+mice.data2 <- mice(df2,m = 1,maxit = 1,method = "cart",seed = 188)
+
+save(mice.data,file="~/Dropbox/mice.data1.Rda")
+save(mice.data2,file="~/Dropbox/mice.data2.Rda")
+
+
 
 

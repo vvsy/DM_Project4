@@ -57,23 +57,43 @@ df[!complete.cases(df[ , 55:59]),] -> df2 #不完整資料
 apply(df1, 2, function(col)sum(is.na(col))/length(col)) -> ratio1
 as.data.frame(ratio1) -> ratio1
 ratio1
+
+
+df2 %>% select(-area4cat,-city7,-city5cat,-city7cat,-nihno) -> df2
 apply(df2, 2, function(col)sum(is.na(col))/length(col)) -> ratio2
 as.data.frame(ratio2) -> ratio2
 ratio2
 
-df2 %>% select(-area4cat,-city7,-city5cat,-city7cat,-nihno) -> df2
-
 library(mice)
-mice.data <- mice(df1,m = 1,maxit = 1,method = "cart",seed = 188)
-mice.data$data
-apply(mice.data$data, 2, function(col)sum(is.na(col))/length(col)) -> ratiomice
-as.data.frame(ratiomice) -> ratiomice
-ratiomice
 
-mice.data2 <- mice(df2,m = 1,maxit = 1,method = "cart",seed = 188)
+####
+mice.data <- mice(df1,
+                  m = 1,           
+                  maxit = 1,      # max iteration
+                  method = "cart", 
+                  seed = 188)
 
-save(mice.data,file="~/Dropbox/mice.data1.Rda")
-save(mice.data2,file="~/Dropbox/mice.data2.Rda")
+micedf1 <- complete(mice.data,1)
+apply(micedf1, 2, function(col)sum(is.na(col))/length(col)) -> miceratio1
+as.data.frame(miceratio1) -> miceratio1
+miceratio1
+
+####
+mice.data2 <- mice(df2,
+                  m = 1,           
+                  maxit = 1,      # max iteration
+                  method = "cart", 
+                  seed = 188)
+
+micedf2 <- complete(mice.data2,1)
+apply(micedf2, 2, function(col)sum(is.na(col))/length(col)) -> miceratio2
+as.data.frame(miceratio2) -> miceratio2
+miceratio2
+####
+
+
+save(micedf1,file="~/Dropbox/mice.data1.Rda")
+save(micedf2,file="~/Dropbox/mice.data2.Rda")
 
 
 

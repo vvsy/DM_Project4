@@ -60,10 +60,61 @@ miceratio
 save(micedf,file="~/Dropbox/mice.data.Rda")
 
 ##outcome
-library(ggplot2)
 ggplot(df,aes(y = df$med_cost)) + geom_boxplot() #離群值6250筆不處理
 df %>% filter(df$med_cost > quantile(df$med_cost,0.75)) %>% summarise(x=n())
 ggplot(df,aes(x = df$dmfail)) + geom_bar() #多6744筆佔總體0.26沒差不處理 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

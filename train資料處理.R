@@ -1,4 +1,4 @@
-filepath <- "~/dropbox/dmclass2018train.csv"
+filepath <- "/Users/liguanzhi/Downloads/dmclass2018train.csv"
 
 read.csv(filepath) -> df
 
@@ -14,6 +14,7 @@ library(mice)
 # explore data
 str(df)
 dim(df)
+
 
 ## look at those unique value
 lapply(df, function(x) length(unique(x))) 
@@ -60,9 +61,9 @@ miceratio
 save(micedf,file="~/Dropbox/mice.data.Rda")
 
 ##outcome
-ggplot(df,aes(y = df$med_cost)) + geom_boxplot() #離群值6250筆不處理
+ggplot(df,aes(y = df$med_cost)) + geom_boxplot() 
 df %>% filter(df$med_cost > quantile(df$med_cost,0.75)) %>% summarise(x=n())
-ggplot(df,aes(x = df$dmfail)) + geom_bar() #多6744筆佔總體0.26沒差不處理 
+ggplot(df,aes(x = df$dmfail)) + geom_bar() 
 
 
 

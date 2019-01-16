@@ -1,0 +1,380 @@
+---
+title: "預測報告"
+author: "710661105李冠緻,710661118王聖曜"
+
+output:
+  slidy_presentation:
+    font_adjustment: -1
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(png)
+```
+
+##資料觀察
+
+資料形式：25000列6行
+
+##資料處理
+
+丟棄fnf與seq57兩行，因兩行中變數皆無變化。
+
+丟棄age與aid21，因存有aid19，三行為同性質之變數。
+
+
+## 遺失值
+
+-遺失值觀察
+
+觀察出areacode變數中XX為遺失值，需處理。
+<img src="https://i.imgur.com/Uk44c96.png">
+
+city5cat,city7,city7cat,nihno,area4cat為非隨機缺失，
+
+city7、nihno、area4cat皆為與方位相關變數，僅留下其中area4cat來補值。
+
+city5cat與city7cat皆與城市有關，留下city5cat進行補值。
+
+-補值方法
+
+cart決策樹
+
+## 離群值
+
+被解釋變數dmfail並無太需要處理的地方兩類的數量差不多。
+
+<img src="https://i.imgur.com/ejWZ5pE.png">
+
+
+被解釋變數med_cost離群值較多，且多為向上超越，約有6000筆，預測時模型將去掉85百分位數以上之資料。
+
+<img src="https://i.imgur.com/C5iEzkP.png">
+
+
+
+#predict med_cost
+
+## linear regression 
+
+- train result
+
+```{r}
+file="~/Desktop/lm.Rda"
+load(file)
+results_lm
+```
+- test result
+```{r}
+file="~/Desktop/lmtest.Rda"
+load(file)
+lmtest
+```
+
+## linear backward regression  
+
+- train result
+
+```{r}
+file="~/Desktop/lmback.Rda"
+load(file)
+results_lmback
+```
+- test result
+```{r}
+file="~/Desktop/lmbacktest.Rda"
+load(file)
+lmbacktest
+```
+
+## linear forward regression  
+
+- train result
+
+```{r}
+file="~/Desktop/lmforward.Rda"
+load(file)
+results_lmforward
+```
+- test result
+```{r}
+file="~/Desktop/lmforwardtest.Rda"
+load(file)
+lmforwardtest
+```
+
+## ridge  
+
+- train result
+
+```{r}
+file="~/Desktop/ridge.Rda"
+load(file)
+results_ridge
+```
+- test result
+```{r}
+file="~/Desktop/ridgetest.Rda"
+load(file)
+ridgetest
+```
+
+
+## lasso
+
+- train result
+
+```{r}
+file="~/Desktop/lasso.Rda"
+load(file)
+results_lasso
+```
+- test result
+```{r}
+file="~/Desktop/lassotest.Rda"
+load(file)
+lassotest
+```
+
+## pcr
+
+- train result
+
+```{r}
+file="~/Desktop/pcr.Rda"
+load(file)
+results_pcr
+```
+- test result
+```{r}
+file="~/Desktop/pcrtest.Rda"
+load(file)
+pcrtest
+```
+
+## gam
+
+- train result
+
+```{r}
+file="~/Desktop/gam.Rda"
+load(file)
+results_gam
+```
+- test result
+```{r}
+file="~/Desktop/gamtest.Rda"
+load(file)
+gamtest
+```
+
+## select model
+### compare model 
+```{r}
+table <- matrix(c(0.445,16864,0.424,17193,0.424,17181,0.445,16886,0.446,16854,0.0001,22646,0.446,16855),ncol=2,byrow=TRUE)
+colnames(table) <- c("Rsquare","rmse")
+rownames(table) <- c("linear regression","backward","forward","ridge","lasso","pcr","gam")
+table <- as.table(table)
+table
+```
+### best model
+  - 擁有最好準確率的模型為lasso，Rsquare為0.446，rmse為16854，接著我們使用它來預測答案。
+
+#predict dmfail
+
+## logistic regression 
+### train result
+```{r}
+file="~/Desktop/results_regreg.Rda"
+load(file)
+results_regreg
+```
+### confusion matrix
+```{r}
+file="~/Desktop/cfm_regreg.Rda"
+load(file)
+cfm_regreg
+```
+### roc
+```{r}
+file="~/Desktop/roc_regreg.Rda"
+load(file)
+roc_regreg
+```
+
+## logistic rigid 
+### train result
+```{r}
+file="~/Desktop/results_rigid.Rda"
+load(file)
+results_rigid
+```
+### confusion matrix
+```{r}
+file="~/Desktop/cfm_rigid.Rda"
+load(file)
+cfm_rigid
+```
+### roc
+```{r}
+file="~/Desktop/roc_rigid.Rda"
+load(file)
+roc_rigid
+```
+
+## logistic lasso
+### train result
+```{r}
+file="~/Desktop/results_lasso.Rda"
+load(file)
+results_lasso
+```
+### confusion matrix
+```{r}
+file="~/Desktop/cfm_lasso.Rda"
+load(file)
+cfm_lasso
+```
+### roc
+```{r}
+file="~/Desktop/roc_lasso.Rda"
+load(file)
+roc_lasso
+```
+
+## logistic GAM
+### train result
+```{r}
+file="~/Desktop/results_GAM.Rda"
+load(file)
+results_GAM
+```
+### confusion matrix
+```{r}
+file="~/Desktop/cfm_GAM.Rda"
+load(file)
+cfm_GAM
+```
+### roc
+```{r}
+file="~/Desktop/roc_GAM.Rda"
+load(file)
+roc_GAM
+```
+
+## Decision Tree
+### train result
+```{r}
+file="~/Desktop/results_dtree.Rda"
+load(file)
+results_dtree
+```
+### confusion matrix
+```{r}
+file="~/Desktop/cfm_dtree.Rda"
+load(file)
+cfm_dtree
+```
+### roc
+```{r}
+file="~/Desktop/roc_dtree.Rda"
+load(file)
+roc_dtree
+```
+
+## k-Nearest Neighbor 
+### train result
+```{r}
+file="~/Desktop/results_knn.Rda"
+load(file)
+results_knn
+```
+### confusion matrix
+```{r}
+file="~/Desktop/cfm_knn.Rda"
+load(file)
+cfm_knn
+```
+### roc
+```{r}
+file="~/Desktop/roc_knn.Rda"
+load(file)
+roc_knn
+```
+
+## Random Forest
+### train result
+```{r}
+file="~/Desktop/results_rf.Rda"
+load(file)
+results_rf
+```
+### confusion matrix
+```{r}
+file="~/Desktop/cfm_rf.Rda"
+load(file)
+cfm_rf
+```
+### roc
+```{r}
+file="~/Desktop/roc_rf.Rda"
+load(file)
+roc_rf
+```
+
+## Neural Networks
+### train result
+```{r}
+file="~/Desktop/results_nnet.Rda"
+load(file)
+results_nnet
+```
+### confusion matrix
+```{r}
+file="~/Desktop/cfm_nnet.Rda"
+load(file)
+cfm_nnet
+```
+### roc
+```{r}
+file="~/Desktop/roc_nnet.Rda"
+load(file)
+roc_nnet
+```
+
+## Bagging
+### train result
+```{r}
+file="~/Desktop/results_bagg.Rda"
+load(file)
+results_bagg
+```
+### confusion matrix
+```{r}
+file="~/Desktop/cfm_bagg.Rda"
+load(file)
+cfm_bagg
+```
+### roc
+```{r}
+file="~/Desktop/roc_bagg.Rda"
+load(file)
+roc_bagg
+```
+
+## select model
+### compare model 
+```{r}
+table <- matrix(c(0.6865,0.7231,0.6833,0.7231,0.6349,0.5,0.7188,0.7588,0.7176,0.7034,0.6816,0.6989,0.9053,0.9589,0.6457,0.6505,0.9091,0.9536),ncol=2,byrow=TRUE)
+colnames(table) <- c("Accuracy","ROC")
+rownames(table) <- c("logistic","logistic rigid","logistic lasso","logistic GAM","DT","K-NN","RF","NN","Bagging")
+table <- as.table(table)
+table
+```
+### best model
+  - 擁有最好準確率的模型為Bagging，準確率為0.9091，ROC CURVE為0.9536，接著我們使用它來預測答案。
+  
+
+
+
+
